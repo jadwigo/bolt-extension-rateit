@@ -315,31 +315,6 @@ class Extension extends \Bolt\BaseExtension
     }
 
     /**
-     * Log the readers rating vote
-     *
-     * @since Bolt 1.5.1
-     *
-     * @param array|string $vars Do something
-     * @return NULL
-     */
-    private function dbLogVote(Request $request)
-    {
-        $query = "INSERT INTO `{$this->log_table_name}` " .
-                 "(`datetime`, `ip`, `cookie`, `content_id`, `contenttype`, `vote`) " .
-                 "VALUES (:datetime, :ip, :cookie, :content_id, :contenttype, :vote)";
-        $map = array(
-                ':datetime' => date("Y-m-d H:i:s", time()),
-                ':ip' => $request->getClientIp(),
-                ':cookie' => $request->cookies->get('bolt_session'),
-                ':content_id' => $request->get('record_id'),
-                ':contenttype' => $request->get('contenttype'),
-                ':vote' => floatval($request->get('value'))
-                );
-
-        $ra = $this->app['db']->executeUpdate($query, $map);
-    }
-
-    /**
      *
      * @since 1.0
      *
