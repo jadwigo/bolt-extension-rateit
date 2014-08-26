@@ -23,7 +23,7 @@ class RateItRecords
      */
     private $config;
 
-    public function __construct(Silex\Application $app)
+    public function __construct(\Bolt\Application $app)
     {
         $this->app = $app;
         $this->config = $this->app['extensions.' . Extension::NAME]->config;
@@ -32,8 +32,6 @@ class RateItRecords
         $this->table_name = $prefix . 'rateit';
         $this->log_table_name = $prefix . 'rateit_log';
     }
-
-
 
     /**
      * Log the readers rating vote
