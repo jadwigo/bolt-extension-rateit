@@ -84,6 +84,50 @@ class RateItRecords
     }
 
     /**
+     * Update extension database rating for an existing record with results of
+     * incomming vote
+     *
+     * @since Bolt 1.5.1
+     *
+     * @param array $rating Array of details about the vote that was made
+     * @return array        Array to be returned to AJAX client
+     */
+    public function dbUpdateRating(Array $rating) {
+        $response = array();
+
+        $map = array(
+            'content_id'  => $rating['record_id'],
+            'contenttype' => $rating['contenttype'],
+            'vote_num'    => $rating['vote_num'],
+            'vote_sum'    => $rating['vote_sum'],
+            'vote_avg'    => $rating['vote_avg']
+        );
+
+        if ($rating['create'] === true) {
+            $result = $this->app['db']->insert($this->table_name, $map);
+        }
+        else {
+            $where = array(
+                'contenttype' => $rating['contenttype'],
+                'content_id' => $rating['record_id']
+            );
+
+            $result = $this->app['db']->update($this->table_name, $map, $where);
+        }
+
+        if ($result === 1) {
+            $response['retval'] = 0;
+            $response['msg'] = str_replace( '%RATING%', $rating['vote'], $this->config['response_msg']);
+            setcookie("rateit[{$rating['contenttype']}][{$rating['record_id']}]", true, time()+31536000, '/');
+        }
+        else {
+            $response['retval'] = 1;
+            $response['msg'] = 'Sorry, something went wrong';
+        }
+        return $response;
+    }
+
+    /**
      * Create/update database tables
      */
     public function dbCheck()

@@ -248,50 +248,6 @@ class Extension extends \Bolt\BaseExtension
     }
 
     /**
-     * Update extension database rating for an existing record with results of
-     * incomming vote
-     *
-     * @since Bolt 1.5.1
-     *
-     * @param array $rating Array of details about the vote that was made
-     * @return array        Array to be returned to AJAX client
-     */
-    private function dbUpdateRating(Array $rating) {
-        $response = array();
-
-        if ($rating['create'] === true) {
-            $query = "INSERT INTO `{$this->table_name}` " .
-                     "(`contenttype`, `content_id`, `vote_num`, `vote_sum`, `vote_avg`) " .
-                     "VALUES (:type, :id, :num, :sum, :avg)";
-        }
-        else {
-            $query = "UPDATE `{$this->table_name}` " .
-                     "SET `vote_num` = :num, `vote_sum` = :sum, `vote_avg` = :avg " .
-                     "WHERE (`contenttype` = :type AND `content_id` = :id) ";
-        }
-        $map = array(
-                ':num'  => $rating['vote_num'],
-                ':sum'  => $rating['vote_sum'],
-                ':avg'  => $rating['vote_avg'],
-                ':type' => $rating['contenttype'],
-                ':id'   => $rating['record_id'],
-                );
-
-        $ra = $this->app['db']->executeUpdate($query, $map);
-
-        if ($ra === 1) {
-            $response['retval'] = 0;
-            $response['msg'] = str_replace( '%RATING%', $rating['vote'], $this->config['response_msg']);
-            setcookie("rateit[{$rating['contenttype']}][{$rating['record_id']}]", true, time()+31536000, '/');
-        }
-        else {
-            $response['retval'] = 1;
-            $response['msg'] = 'Sorry, something went wrong';
-        }
-        return $response;
-    }
-
-    /**
      *
      * @since 1.0
      *
