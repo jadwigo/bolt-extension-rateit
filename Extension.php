@@ -38,6 +38,13 @@ class Extension extends \Bolt\BaseExtension
         if ($this->app['config']->getWhichEnd() == 'frontend') {
             //
         }
+
+        /*
+         * AJAX
+         */
+        if ($this->app['config']->getWhichEnd() == 'async') {
+            $this->setController();
+        }
     }
 
     /**
@@ -69,6 +76,20 @@ class Extension extends \Bolt\BaseExtension
         if (empty($this->config['logging'])) {
             $this->config['logging'] = 'off';
         }
+    }
+
+    /**
+     * Create controller and define routes
+     */
+    private function setController()
+    {
+        // Create controller object
+        $this->controller = new Controller($this->app);
+
+        // OAuth callback URI
+        $this->app->match("/async/RateIt", array($this->controller, 'ajaxRateIt'))
+                    ->bind('ajaxRateIt')
+                    ->method('POST');
     }
 
 }

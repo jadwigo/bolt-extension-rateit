@@ -55,8 +55,6 @@ class RateItRecords
         $this->app['db']->insert($this->log_table_name, $map);
     }
 
-
-
     /**
      * Lookup extension database to see if a rating exists for an existing
      * record and return it.
