@@ -57,6 +57,32 @@ class RateItRecords
         $this->app['db']->insert($this->log_table_name, $map);
     }
 
+
+
+    /**
+     * Lookup extension database to see if a rating exists for an existing
+     * record and return it.
+     *
+     * @since Bolt 1.5.1
+     *
+     * @param string $contenttype The Bolt contenttype being rated
+     * @param string $record_id The record ID being rated
+     * @return array
+     */
+    public function dbLookupRating(Array $rating) {
+
+        $query = "SELECT vote_num, vote_sum, vote_avg " .
+                 "FROM {$this->table_name} " .
+                 "WHERE (contenttype = :contenttype AND content_id = :content_id)";
+
+        $map = array(
+            ':contenttype' => $rating['contenttype'],
+            ':content_id' => $rating['record_id']
+        );
+
+        return $this->app['db']->fetchAssoc($query, $map);
+    }
+
     /**
      * Create/update database tables
      */

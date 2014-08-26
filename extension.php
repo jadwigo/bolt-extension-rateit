@@ -248,29 +248,6 @@ class Extension extends \Bolt\BaseExtension
     }
 
     /**
-     * Lookup extension database to see if a rating exists for an existing
-     * record and return it.
-     *
-     * @since Bolt 1.5.1
-     *
-     * @param string $contenttype The Bolt contenttype being rated
-     * @param string $record_id The record ID being rated
-     * @return array
-     */
-    private function dbLookupRating(Array $rating) {
-
-        $query =
-            "SELECT vote_num, vote_sum, vote_avg " .
-            "FROM `{$this->table_name}` " .
-            "WHERE ( `contenttype` = '{$rating['contenttype']}' AND `content_id` = '{$rating['record_id']}' ) " .
-            "LIMIT 1";
-
-        $rating = $this->app['db']->fetchAll($query);
-
-        return $rating;
-    }
-
-    /**
      * Update extension database rating for an existing record with results of
      * incomming vote
      *
