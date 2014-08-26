@@ -1,0 +1,7 @@
+
+<script type="text/javascript">
+    var tooltipvalues = "{{ tooltips }}";
+    $('.rateit').bind('over', function(e, value) {
+        $(this).attr('title', tooltipvalues[value - 1]);
+    });
+</script>
