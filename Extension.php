@@ -22,6 +22,20 @@ class Extension extends \Bolt\BaseExtension
          * Config
          */
         $this->setConfig();
+
+        /*
+         * Backend
+         */
+        if ($this->app['config']->getWhichEnd() == 'backend') {
+            //
+        }
+
+        /*
+         * Frontend
+         */
+        if ($this->app['config']->getWhichEnd() == 'frontend') {
+            //
+        }
     }
 
     /**
