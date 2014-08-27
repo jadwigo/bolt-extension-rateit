@@ -110,6 +110,8 @@ class Extension extends \Bolt\BaseExtension
     protected function getDefaultConfig()
     {
         return array(
+            'stylesheet' => 'rateit.css',
+            'location' => 'head',
             'stars' => 5,
             'increment' => 0.5,
             'tooltips' => '',
@@ -156,10 +158,10 @@ class Extension extends \Bolt\BaseExtension
     {
         // Inject CSS
         if ($this->config['location'] == 'body') {
-            $this->addCSS($this->config['stylesheet'], true);
+            $this->addCSS('css/' . $this->config['stylesheet'], true);
 
         } else {
-            $this->addCSS($this->config['stylesheet']);
+            $this->addCSS('css/' . $this->config['stylesheet']);
         }
 
         // JavaScript
