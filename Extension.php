@@ -105,17 +105,26 @@ class Extension extends \Bolt\BaseExtension
     }
 
     /**
-     * Set up config and defaults
+     * Config defaults
+     */
+    protected function getDefaultConfig()
+    {
+        return array(
+            'stars' => 5,
+            'increment' => 0.5,
+            'tooltips' => '',
+            'reponse_class' => '',
+            'response_msg' => '',
+            'logging' => 'off',
+        );
+    }
+
+    /**
+     * Set up config
      */
     private function setConfig()
     {
         // Sane defaults
-        if (empty($this->config['stars'])) {
-            $this->config['stars'] = 5;
-        }
-        if (empty($this->config['increment'])) {
-            $this->config['increment'] = 0.5;
-        }
         if (!empty($this->config['size']) && $this->config['size'] == 'large') {
             $this->config['px'] = 32;
             $this->config['class'] = 'bigstars';
@@ -124,19 +133,8 @@ class Extension extends \Bolt\BaseExtension
             $this->config['px'] = 16;
             $this->config['class'] = '';
         }
-        if (empty($this->config['tooltips'])) {
-            $this->config['tooltips'] = '';
-        } else {
+        if (!empty($this->config['tooltips'])) {
             $this->config['tooltips'] = json_encode($this->config['tooltips']);
-        }
-        if (empty($this->config['reponse_class'])) {
-            $this->config['reponse_class'] = '';
-        }
-        if (empty($this->config['response_msg'])) {
-            $this->config['response_msg'] = '';
-        }
-        if (empty($this->config['logging'])) {
-            $this->config['logging'] = 'off';
         }
     }
 
