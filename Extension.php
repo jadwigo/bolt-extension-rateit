@@ -11,7 +11,7 @@ use Bolt\Extensions\Snippets\Location as SnippetLocation;
  */
 class Extension extends \Bolt\BaseExtension
 {
-    const NAME = 'rateit';
+    const NAME = 'RateIt';
 
     public function getName()
     {
