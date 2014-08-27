@@ -170,7 +170,7 @@ class Extension extends \Bolt\BaseExtension
             'tooltips' => $this->config['tooltips']
         ));
 
-        $this->insertSnippet(SnippetLocation::END_OF_HTML, $js);
+        $this->addSnippet(SnippetLocation::END_OF_HTML, $js);
     }
 
     private function getRecord($record = null)
