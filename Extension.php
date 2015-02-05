@@ -165,8 +165,7 @@ class Extension extends \Bolt\BaseExtension
         }
 
         // JavaScript
-        $this->addJavascript('js/jquery.rateit.min.js', true);
-        $this->addJavascript('js/bolt.rateit.js', true);
+        $this->addJavascript('js/bolt.rateit.min.js', true);
 
         $js = $this->app['render']->render('_javascript.twig', array(
             'tooltips' => $this->config['tooltips']

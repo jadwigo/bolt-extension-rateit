@@ -10,7 +10,7 @@ $('.rateit').bind(
 			var contenttype = ri.data('bolt-contenttype');
 
 			$.ajax({
-				url : '/async/RateIt',
+				url : '/async/RateIt/',
 				data : {
 					record_id : record_id,
 					contenttype : contenttype,
