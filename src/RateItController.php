@@ -2,38 +2,52 @@
 
 namespace Bolt\Extension\Bolt\RateIt;
 
+use Silex;
+use Silex\ControllerProviderInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * RateIt Controller
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class Controller
+class RateItController implements ControllerProviderInterface
 {
     /**
-     * @var Silex\Application
-     */
-    private $app;
-
-    /**
-     * @var Extension config array
+     * @var array
      */
     private $config;
 
-    public function __construct(\Bolt\Application $app)
+    /**
+     * @param  Silex\Application           $app
+     * @return \Silex\ControllerCollection
+     */
+    public function connect(Silex\Application $app)
     {
-        $this->app = $app;
-        $this->config = $this->app['extensions.' . Extension::NAME]->config;
+        $this->config = $app[Extension::CONTAINER]->config;
+
+        /**
+         * @var $ctr \Silex\ControllerCollection
+         */
+        $ctr = $app['controllers_factory'];
+
+        $ctr->match('/', array($this, 'ajaxRateIt'))
+            ->bind('ajaxRateIt')
+            ->method('POST');
+
+        return $ctr;
     }
 
     /**
      * AJAX POST controller
      *
-     * @param array|string $vars Do something
-     * @return NULL
+     * @param  Silex\Application                             $app
+     * @param  Symfony\Component\HttpFoundation\Request      $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
      */
-    function ajaxRateIt(Request $request, $errors = null)
+    public function ajaxRateIt(Silex\Application $app, Request $request, $errors = null)
     {
         // Initialise rating array
         $rating = array();
@@ -46,10 +60,10 @@ class Controller
         // Check that we're here for a POST instead of a programmer typo
         if ($request->getMethod() === 'POST') {
             // Database records object
-            $db = new RateItRecords($this->app);
+            $db = new RateItRecords($app);
 
             if ($this->config['logging'] == 'on') {
-                $this->dbLogVote($request);
+                $db->dbLogVote($request);
             }
 
             $rating['contenttype'] = $request->get('contenttype');
@@ -74,9 +88,9 @@ class Controller
             // Write it back
             $response = $db->dbUpdateRating($rating);
 
-            echo json_encode($response);
+            return new JsonResponse($response);
         }
 
-        exit;
+        return new JsonResponse('Invalid request type!', JsonResponse::HTTP_FORBIDDEN);
     }
 }

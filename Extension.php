@@ -11,7 +11,15 @@ use Bolt\Extensions\Snippets\Location as SnippetLocation;
  */
 class Extension extends \Bolt\BaseExtension
 {
+    /**
+     * @var string Extension name
+     */
     const NAME = 'RateIt';
+
+    /**
+     * @var string Extension's container
+     */
+    const CONTAINER = 'extensions.RateIt';
 
     public function getName()
     {
@@ -145,13 +153,7 @@ class Extension extends \Bolt\BaseExtension
      */
     private function setController()
     {
-        // Create controller object
-        $this->controller = new Controller($this->app);
-
-        // OAuth callback URI
-        $this->app->match("/async/RateIt", array($this->controller, 'ajaxRateIt'))
-                    ->bind('ajaxRateIt')
-                    ->method('POST');
+        $this->app->mount('/async/RateIt', new RateItController());
     }
 
     private function addAssets()
