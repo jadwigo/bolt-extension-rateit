@@ -1,4 +1,4 @@
-/*! RateIt | v1.0.20 / 01/26/2014 | https://rateit.codeplex.com/license
+﻿/*! RateIt | v1.0.22 / 05/27/2014 | https://rateit.codeplex.com/license
     http://rateit.codeplex.com | Twitter: @gjunge
 */
 (function ($) {
@@ -120,9 +120,8 @@
                 //are we LTR or RTL?
 
                 if (itemdata('backingfld')) {
-                    //if we have a backing field, hide it, and get its value, and override defaults if range.
-                    var fld = $(itemdata('backingfld'));
-                    itemdata('value', fld.hide().val());
+                    //if we have a backing field, hide it, override defaults if range or select.
+                    var fld = $(itemdata('backingfld')).hide();
 
                     if (fld.attr('disabled') || fld.attr('readonly')) {
                         itemdata('readonly', true); //http://rateit.codeplex.com/discussions/362055 , if a backing field is disabled or readonly at instantiation, make rateit readonly.
@@ -137,16 +136,26 @@
                         }
                     }
                     if (fld[0].nodeName == 'SELECT' && fld[0].options.length > 1) {
-                        itemdata('min', Number(fld[0].options[0].value));
+                        itemdata('min', (!isNaN(itemdata('min')) ? itemdata('min') : Number(fld[0].options[0].value)));
                         itemdata('max', Number(fld[0].options[fld[0].length - 1].value));
                         itemdata('step', Number(fld[0].options[1].value) - Number(fld[0].options[0].value));
+                        //see if we have a option that as explicity been selected
+                        var selectedOption = fld.find('option[selected]');
+                        if (selectedOption.length == 1) {
+                            itemdata('value', selectedOption.val());
+                        }
+                    }
+                    else {
+                        //if it is not a select box, we can get's it's value using the val function. 
+                        //If it is a selectbox, we always get a value (the first one of the list), even if it was not explicity set.
+                        itemdata('value', fld.val());
                     }
                 }
 
                 //Create the necessary tags. For ARIA purposes we need to give the items an ID. So we use an internal index to create unique ids
                 var element = item[0].nodeName == 'DIV' ? 'div' : 'span';
                 index++;
-                var html = '<button id="rateit-reset-{{index}}" data-role="none" class="rateit-reset" aria-label="' + $.rateit.aria.resetLabel + '" aria-controls="rateit-range-{{index}}"></button><{{element}} id="rateit-range-{{index}}" class="rateit-range" tabindex="0" role="slider" aria-label="' + $.rateit.aria.ratingLabel + '" aria-owns="rateit-reset-{{index}}" aria-valuemin="' + itemdata('min') + '" aria-valuemax="' + itemdata('max') + '" aria-valuenow="' + itemdata('value') + '"><{{element}} class="rateit-selected" style="height:' + itemdata('starheight') + 'px"></{{element}}><{{element}} class="rateit-hover" style="height:' + itemdata('starheight') + 'px"></{{element}}></{{element}}>';
+                var html = '<button id="rateit-reset-{{index}}" type="button" data-role="none" class="rateit-reset" aria-label="' + $.rateit.aria.resetLabel + '" aria-controls="rateit-range-{{index}}"></button><{{element}} id="rateit-range-{{index}}" class="rateit-range" tabindex="0" role="slider" aria-label="' + $.rateit.aria.ratingLabel + '" aria-owns="rateit-reset-{{index}}" aria-valuemin="' + itemdata('min') + '" aria-valuemax="' + itemdata('max') + '" aria-valuenow="' + itemdata('value') + '"><{{element}} class="rateit-selected" style="height:' + itemdata('starheight') + 'px"></{{element}}><{{element}} class="rateit-hover" style="height:' + itemdata('starheight') + 'px"></{{element}}></{{element}}>';
                 item.append(html.replace(/{{index}}/gi, index).replace(/{{element}}/gi, element));
 
                 //if we are in RTL mode, we have to change the float of the "reset button"
