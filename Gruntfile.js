@@ -10,8 +10,10 @@ module.exports = function(grunt) {
 				},
 				files : {
 					'js/bolt.rateit.min.js' : [
-							'js/jquery.rateit.js',
-							'js/init.js' ]
+						'js/jquery.rateit.js',
+						'js/cookies.js',
+						'js/init.js' 
+					]
 				}
 			}
 		}
