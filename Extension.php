@@ -87,10 +87,7 @@ class Extension extends \Bolt\BaseExtension
         // Get the current value of the rating
         try {
             $db = new RateItRecords($this->app);
-            $lookup = $db->dbLookupRating(array(
-                'contenttype' => $bolt_contenttype,
-                'record_id'   => $bolt_record_id)
-            );
+            $lookup = $db->dbLookupRating($bolt_contenttype, $bolt_record_id);
 
             if (!empty($lookup) && isset($lookup['vote_avg'])) {
                 $current_val = $lookup['vote_avg'];
