@@ -2,125 +2,134 @@
 
 namespace Bolt\Extension\Bolt\RateIt;
 
+use Bolt\Application;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Schema;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Sirius\Validation\Rule\Integer;
 
 /**
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
 class RateItRecords
 {
-    /**
-     * @var Silex\Application
-     */
+    /** @var Silex\Application */
     private $app;
 
-    /**
-     * @var Extension config array
-     */
+    /** @var array Extension config  */
     private $config;
 
-    public function __construct(\Bolt\Application $app)
+    /**
+     * @param \Bolt\Application $app
+     */
+    public function __construct(Application $app)
     {
         $this->app = $app;
         $this->config = $this->app['extensions.' . Extension::NAME]->config;
 
-        $prefix = $this->app['config']->get('general/database/prefix', "bolt_");
-        $this->table_name = $prefix . 'rateit';
+        $prefix = $this->app['config']->get('general/database/prefix', 'bolt_');
+
+        $this->table_name     = $prefix . 'rateit';
         $this->log_table_name = $prefix . 'rateit_log';
     }
 
     /**
      * Log the readers rating vote
      *
-     * @since Bolt 1.5.1
-     *
-     * @param array|string $vars Do something
-     *
-     * @return NULL
+     * @param array $vote
      */
-    public function dbLogVote(Request $request)
+    public function dbLogVote(array $vote)
     {
-        $map = array(
-            'datetime'    => date("Y-m-d H:i:s", time()),
-            'ip'          => $request->getClientIp(),
-            'cookie'      => $request->cookies->get('bolt_session'),
-            'content_id'  => $request->get('record_id'),
-            'contenttype' => $request->get('contenttype'),
-            'vote'        => floatval($request->get('value'))
-        );
-
-        $this->app['db']->insert($this->log_table_name, $map);
+        /** @var \Doctrine\DBAL\Query\QueryBuilder $query */
+        $this->app['db']
+            ->createQueryBuilder()
+            ->insert($this->log_table_name)
+            ->values(array(
+                'datetime'    => ':datetime',
+                'ip'          => ':ip',
+                'cookie'      => ':cookie',
+                'content_id'  => ':content_id',
+                'contenttype' => ':contenttype',
+                'vote'        => ':vote'
+            ))
+            ->setParameters(array(
+                'datetime'    => date('Y-m-d H:i:s', time()),
+                'ip'          => $vote['ip'],
+                'cookie'      => $vote['cookie'],
+                'content_id'  => $vote['content_id'],
+                'contenttype' => $vote['contenttype'],
+                'vote'        => $vote['vote']
+            ))
+            ->execute();
     }
 
     /**
      * Lookup extension database to see if a rating exists for an existing
      * record and return it.
      *
-     * @since Bolt 1.5.1
-     *
-     * @param string $contenttype The Bolt contenttype being rated
-     * @param string $record_id   The record ID being rated
+     * @param string  $contenttype
+     * @param integer $record_id
      *
      * @return array
      */
-    public function dbLookupRating(Array $rating)
+    public function dbLookupRating($contenttype, $record_id)
     {
-        $query = "SELECT vote_num, vote_sum, vote_avg " .
-                 "FROM {$this->table_name} " .
-                 "WHERE (contenttype = :contenttype AND content_id = :content_id)";
+        /** @var \Doctrine\DBAL\Query\QueryBuilder $query */
+        $query = $this->app['db']
+            ->createQueryBuilder()
+            ->select('vote_num, vote_sum, vote_avg')
+            ->from($this->table_name)
+            ->where('contenttype = :contenttype AND content_id = :content_id')
+            ->setParameters(array(
+                'content_id'  => $record_id,
+                'contenttype' => $contenttype
+            ))
+        ;
 
-        $map = array(
-            ':contenttype' => $rating['contenttype'],
-            ':content_id'  => $rating['record_id']
-        );
-
-        return $this->app['db']->fetchAssoc($query, $map);
+        return $query->execute()->fetch(\PDO::FETCH_ASSOC);
     }
 
     /**
      * Update extension database rating for an existing record with results of
      * incomming vote
      *
-     * @since Bolt 1.5.1
-     *
      * @param array $rating Array of details about the vote that was made
      *
      * @return array Array to be returned to AJAX client
      */
-    public function dbUpdateRating(Array $rating)
+    public function dbUpdateRating(array $rating)
     {
-        $response = array();
-
-        $map = array(
-            'content_id'  => $rating['record_id'],
-            'contenttype' => $rating['contenttype'],
-            'vote_num'    => $rating['vote_num'],
-            'vote_sum'    => $rating['vote_sum'],
-            'vote_avg'    => $rating['vote_avg']
-        );
+        /** @var \Doctrine\DBAL\Query\QueryBuilder $query */
+        $query = $this->app['db']->createQueryBuilder();
 
         if ($rating['create'] === true) {
-            $result = $this->app['db']->insert($this->table_name, $map);
+            $query->insert($this->table_name)
+                ->values(array(
+                    'content_id'  => ':content_id',
+                    'contenttype' => ':contenttype',
+                    'vote_num'    => ':vote_num',
+                    'vote_sum'    => ':vote_sum',
+                    'vote_avg'    => ':vote_avg'
+            ));
         } else {
-            $where = array(
+            $query->update($this->table_name)
+                ->set('vote_num',    ':vote_num')
+                ->set('vote_sum',    ':vote_sum')
+                ->set('vote_avg',    ':vote_avg')
+                ->where('contenttype   = :contenttype', 'content_id = :content_id')
+            ;
+        }
+
+        $result = $query
+            ->setParameters(array(
+                'content_id'  => $rating['content_id'],
                 'contenttype' => $rating['contenttype'],
-                'content_id'  => $rating['record_id']
-            );
+                'vote_num'    => $rating['vote_num'],
+                'vote_sum'    => $rating['vote_sum'],
+                'vote_avg'    => $rating['vote_avg']
+            ))
+            ->execute();
 
-            $result = $this->app['db']->update($this->table_name, $map, $where);
-        }
-
-        if ($result === 1) {
-            $response['retval'] = 0;
-            $response['msg'] = str_replace('%RATING%', $rating['vote'], $this->config['response_msg']);
-            setcookie("rateit[{$rating['contenttype']}][{$rating['record_id']}]", true, time()+31536000, '/');
-        } else {
-            $response['retval'] = 1;
-            $response['msg'] = 'Sorry, something went wrong';
-        }
-        return $response;
+        return $result;
     }
 
     /**
@@ -136,20 +145,18 @@ class RateItRecords
                 // Define table
                 $table = $schema->createTable($me->table_name);
 
-                // Add primary column
-                $table->addColumn("id", "integer", array('autoincrement' => true));
-                $table->setPrimaryKey(array("id"));
-
-                // Add working columns
-                $table->addColumn("content_id", "integer", array("length" => 11));
-                $table->addColumn("contenttype", "string", array("length" => 32));
-                $table->addColumn("vote_num", "integer");
-                $table->addColumn("vote_sum", "decimal", array("scale" => '2'));
-                $table->addColumn("vote_avg", "decimal", array("scale" => '2'));
+                $table->addColumn('id',          'integer', array('autoincrement' => true));
+                $table->addColumn('content_id',  'integer', array('length' => 11));
+                $table->addColumn('contenttype', 'string',  array('length' => 32));
+                $table->addColumn('vote_num',    'integer');
+                $table->addColumn('vote_sum',    'decimal', array('scale'  => 2));
+                $table->addColumn('vote_avg',    'decimal', array('scale'  => 2));
 
                 // Index column(s)
+                $table->setPrimaryKey(array('id'));
                 $table->addIndex(array('content_id'));
                 $table->addIndex(array('contenttype'));
+
                 return $table;
             });
 
@@ -159,17 +166,15 @@ class RateItRecords
                 // Define table
                 $table = $schema->createTable($me->log_table_name);
 
-                // Add primary column
-                $table->addColumn("id", "integer", array('autoincrement' => true));
-                $table->setPrimaryKey(array("id"));
+                $table->addColumn('id',          'integer', array('autoincrement' => true));
+                $table->addColumn('datetime',    'datetime');
+                $table->addColumn('ip',          'string',  array('length' => 39));
+                $table->addColumn('cookie',      'string');
+                $table->addColumn('content_id',  'integer', array('length' => 11));
+                $table->addColumn('contenttype', 'string',  array('length' => 32));
+                $table->addColumn('vote',        'decimal', array('scale'  => 2));
 
-                // Add working columns
-                $table->addColumn("datetime", "datetime");
-                $table->addColumn("ip", "string", array("length" => 39));
-                $table->addColumn("cookie", "string");
-                $table->addColumn("content_id", "integer", array("length" => 11));
-                $table->addColumn("contenttype", "string", array("length" => 32));
-                $table->addColumn("vote", "decimal", array("scale" => '2'));
+                $table->setPrimaryKey(array('id'));
 
                 return $table;
             });
