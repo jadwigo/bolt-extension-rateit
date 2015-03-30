@@ -10,16 +10,16 @@
     step="{{ inc }}"
     id="boltrateit{{ suffix }}"/>
 <div
-    class="rateit {{ config['class'] }}"
+    class="rateit {{ config.class }}"
     data-bolt-record-id="{{ record.id|default('') }}"
     data-rateit-backingfld="#boltrateit{{ suffix }}"
-    data-rateit-starwidth="{{ config['px'] }}"
-    data-rateit-starheight="{{ config['px'] }}"
+    data-rateit-starwidth="{{ config.px }}"
+    data-rateit-starheight="{{ config.px }}"
     data-bolt-contenttype="{{ bolt_contenttype }}"
     data-bolt-rateit-value="{{ current_val }}">
 </div>
 <div
-    class="{{ config['response_class'] }}"
+    class="{{ config.response_class }}"
     id="rateit_response{{ suffix }}"
     hidden >
 </div>
