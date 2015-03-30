@@ -19,6 +19,9 @@
     data-rateit-readonly="true"
     {% endif %}
     data-bolt-contenttype="{{ bolt_contenttype }}"
+    {% if current_val != 0 %}
+    data-rateit-ispreset="true"
+    {% endif %}
     data-bolt-rateit-value="{{ current_val }}">
 </div>
 <div
