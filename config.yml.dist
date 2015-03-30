@@ -9,6 +9,10 @@ location: head
 # Number of stars (default: 5)
 #stars: 5
 
+# Lock the rating stars on a record after a vote is cast. This will prevent
+# reseting the vote & further votes (default: false)
+#lock_after_vote: true
+
 # Increment of voting: '0.25', '0.5', '1' (default: 0.5)
 #increment: 0.5
 

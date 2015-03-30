@@ -15,6 +15,9 @@
     data-rateit-backingfld="#boltrateit{{ suffix }}"
     data-rateit-starwidth="{{ config.px }}"
     data-rateit-starheight="{{ config.px }}"
+    {% if config.lock_after_vote and readonly %}
+    data-rateit-readonly="true"
+    {% endif %}
     data-bolt-contenttype="{{ bolt_contenttype }}"
     data-bolt-rateit-value="{{ current_val }}">
 </div>
