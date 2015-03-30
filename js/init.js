@@ -19,9 +19,6 @@ $('.rateit').bind(
 				type : 'POST',
 				success : function(data) {
 					if (value != 0) {
-						// Disable voting
-						ri.rateit('readonly', true);
-
 						var retval = data.retval;
 						var msg = data.msg;
 						$('#rateit_response').html('<span>' + msg + '</span>');

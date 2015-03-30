@@ -101,7 +101,6 @@ class Extension extends \Bolt\BaseExtension
         $html = $this->app['render']->render('rateit.twig', array(
             'config' => $this->config,
             'max' => $max,
-            'readonly' => $this->isCookieSet($record),
             'inc' => $inc,
             'record' => $record,
             'bolt_record_id' => $bolt_record_id,
