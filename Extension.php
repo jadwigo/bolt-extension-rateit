@@ -58,6 +58,13 @@ class Extension extends \Bolt\BaseExtension
         }
     }
 
+    /**
+     * Twig callback
+     *
+     * @param string $record
+     *
+     * @return \Twig_Markup
+     */
     public function twigRateIt($record = null)
     {
         // Add our twig path
@@ -84,13 +91,12 @@ class Extension extends \Bolt\BaseExtension
             $db = new RateItRecords($this->app);
             $lookup = $db->dbLookupRating(array(
                 'contenttype' => $bolt_contenttype,
-                'record_id' => $bolt_record_id)
+                'record_id'   => $bolt_record_id)
             );
 
-            if(!empty($lookup) && isset($lookup['vote_avg'])) {
+            if (!empty($lookup) && isset($lookup['vote_avg'])) {
                 $current_val = $lookup['vote_avg'];
-            }
-            else {
+            } else {
                 $current_val = 0;
             }
         } catch (\Exception $e) {
@@ -99,13 +105,13 @@ class Extension extends \Bolt\BaseExtension
 
         // Customisation goes here. See http://rateit.codeplex.com/documentation
         $html = $this->app['render']->render('rateit.twig', array(
-            'config' => $this->config,
-            'max' => $max,
-            'inc' => $inc,
-            'record' => $record,
-            'bolt_record_id' => $bolt_record_id,
+            'config'           => $this->config,
+            'max'              => $max,
+            'inc'              => $inc,
+            'record'           => $record,
+            'bolt_record_id'   => $bolt_record_id,
             'bolt_contenttype' => $bolt_contenttype,
-            'current_val' => $current_val
+            'current_val'      => $current_val
         ));
 
         return new \Twig_Markup($html, 'UTF-8');
@@ -117,14 +123,14 @@ class Extension extends \Bolt\BaseExtension
     protected function getDefaultConfig()
     {
         return array(
-            'stylesheet' => 'rateit.css',
-            'location' => 'head',
-            'stars' => 5,
-            'increment' => 0.5,
-            'tooltips' => '',
+            'stylesheet'    => 'rateit.css',
+            'location'      => 'head',
+            'stars'         => 5,
+            'increment'     => 0.5,
+            'tooltips'      => '',
             'reponse_class' => '',
-            'response_msg' => '',
-            'logging' => 'off',
+            'response_msg'  => '',
+            'logging'       => 'off',
         );
     }
 
@@ -137,8 +143,7 @@ class Extension extends \Bolt\BaseExtension
         if (!empty($this->config['size']) && $this->config['size'] == 'large') {
             $this->config['px'] = 32;
             $this->config['class'] = 'bigstars';
-        }
-        else {
+        } else {
             $this->config['px'] = 16;
             $this->config['class'] = '';
         }
@@ -160,7 +165,6 @@ class Extension extends \Bolt\BaseExtension
         // Inject CSS
         if ($this->config['location'] == 'body') {
             $this->addCSS('css/' . $this->config['stylesheet'], true);
-
         } else {
             $this->addCSS('css/' . $this->config['stylesheet']);
         }
@@ -189,8 +193,7 @@ class Extension extends \Bolt\BaseExtension
 
         if (isset($globalTwigVars['record'])) {
             return $globalTwigVars['record'];
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -200,12 +203,11 @@ class Extension extends \Bolt\BaseExtension
     private function isCookieSet($record = null)
     {
         $bolt_record_id = $record->id;
-        $bolt_contenttype = strtolower( $record->contenttype['name'] );
+        $bolt_contenttype = strtolower($record->contenttype['name']);
 
         if (isset($_COOKIE['rateit'][$bolt_contenttype][$bolt_record_id])) {
             return true;
         }
         return false;
     }
-
 }

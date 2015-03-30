@@ -2,13 +2,11 @@
 
 namespace Bolt\Extension\Bolt\RateIt;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
 use Doctrine\DBAL\Schema\Schema;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- *
- *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
 class RateItRecords
@@ -39,17 +37,18 @@ class RateItRecords
      * @since Bolt 1.5.1
      *
      * @param array|string $vars Do something
+     *
      * @return NULL
      */
     public function dbLogVote(Request $request)
     {
         $map = array(
-            'datetime' => date("Y-m-d H:i:s", time()),
-            'ip' => $request->getClientIp(),
-            'cookie' => $request->cookies->get('bolt_session'),
-            'content_id' => $request->get('record_id'),
+            'datetime'    => date("Y-m-d H:i:s", time()),
+            'ip'          => $request->getClientIp(),
+            'cookie'      => $request->cookies->get('bolt_session'),
+            'content_id'  => $request->get('record_id'),
             'contenttype' => $request->get('contenttype'),
-            'vote' => floatval($request->get('value'))
+            'vote'        => floatval($request->get('value'))
         );
 
         $this->app['db']->insert($this->log_table_name, $map);
@@ -62,18 +61,19 @@ class RateItRecords
      * @since Bolt 1.5.1
      *
      * @param string $contenttype The Bolt contenttype being rated
-     * @param string $record_id The record ID being rated
+     * @param string $record_id   The record ID being rated
+     *
      * @return array
      */
-    public function dbLookupRating(Array $rating) {
-
+    public function dbLookupRating(Array $rating)
+    {
         $query = "SELECT vote_num, vote_sum, vote_avg " .
                  "FROM {$this->table_name} " .
                  "WHERE (contenttype = :contenttype AND content_id = :content_id)";
 
         $map = array(
             ':contenttype' => $rating['contenttype'],
-            ':content_id' => $rating['record_id']
+            ':content_id'  => $rating['record_id']
         );
 
         return $this->app['db']->fetchAssoc($query, $map);
@@ -86,9 +86,11 @@ class RateItRecords
      * @since Bolt 1.5.1
      *
      * @param array $rating Array of details about the vote that was made
-     * @return array        Array to be returned to AJAX client
+     *
+     * @return array Array to be returned to AJAX client
      */
-    public function dbUpdateRating(Array $rating) {
+    public function dbUpdateRating(Array $rating)
+    {
         $response = array();
 
         $map = array(
@@ -101,11 +103,10 @@ class RateItRecords
 
         if ($rating['create'] === true) {
             $result = $this->app['db']->insert($this->table_name, $map);
-        }
-        else {
+        } else {
             $where = array(
                 'contenttype' => $rating['contenttype'],
-                'content_id' => $rating['record_id']
+                'content_id'  => $rating['record_id']
             );
 
             $result = $this->app['db']->update($this->table_name, $map, $where);
@@ -113,10 +114,9 @@ class RateItRecords
 
         if ($result === 1) {
             $response['retval'] = 0;
-            $response['msg'] = str_replace( '%RATING%', $rating['vote'], $this->config['response_msg']);
+            $response['msg'] = str_replace('%RATING%', $rating['vote'], $this->config['response_msg']);
             setcookie("rateit[{$rating['contenttype']}][{$rating['record_id']}]", true, time()+31536000, '/');
-        }
-        else {
+        } else {
             $response['retval'] = 1;
             $response['msg'] = 'Sorry, something went wrong';
         }
@@ -132,7 +132,7 @@ class RateItRecords
 
         // Rating table
         $this->app['integritychecker']->registerExtensionTable(
-            function(Schema $schema) use ($me) {
+            function (Schema $schema) use ($me) {
                 // Define table
                 $table = $schema->createTable($me->table_name);
 
@@ -155,7 +155,7 @@ class RateItRecords
 
         // Log table
         $this->app['integritychecker']->registerExtensionTable(
-            function(Schema $schema) use ($me) {
+            function (Schema $schema) use ($me) {
                 // Define table
                 $table = $schema->createTable($me->log_table_name);
 

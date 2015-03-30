@@ -21,7 +21,8 @@ class RateItController implements ControllerProviderInterface
     private $config;
 
     /**
-     * @param  Silex\Application           $app
+     * @param \Silex\Application $app
+     *
      * @return \Silex\ControllerCollection
      */
     public function connect(Silex\Application $app)
@@ -43,8 +44,9 @@ class RateItController implements ControllerProviderInterface
     /**
      * AJAX POST controller
      *
-     * @param  Silex\Application                             $app
-     * @param  Symfony\Component\HttpFoundation\Request      $request
+     * @param \Silex\Application                        $app
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function ajaxRateIt(Silex\Application $app, Request $request, $errors = null)
@@ -77,8 +79,7 @@ class RateItController implements ControllerProviderInterface
                 $rating['vote_num'] = 1;
                 $rating['vote_sum'] = $rating['vote'];
                 $rating['vote_avg'] = $rating['vote_sum'];
-            }
-            else {
+            } else {
                 $rating['create'] = false;
                 $rating['vote_num'] = $db_rating['vote_num'] + 1;
                 $rating['vote_sum'] = $db_rating['vote_sum'] + $rating['vote'];
