@@ -53,9 +53,7 @@ class Extension extends \Bolt\BaseExtension
         /*
          * AJAX
          */
-        if ($this->app['config']->getWhichEnd() == 'async') {
-            $this->setController();
-        }
+        $this->setController();
     }
 
     /**
