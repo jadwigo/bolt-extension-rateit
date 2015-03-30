@@ -123,14 +123,14 @@ class Extension extends \Bolt\BaseExtension
     protected function getDefaultConfig()
     {
         return array(
-            'stylesheet'    => 'rateit.css',
-            'location'      => 'head',
-            'stars'         => 5,
-            'increment'     => 0.5,
-            'tooltips'      => '',
-            'reponse_class' => '',
-            'response_msg'  => '',
-            'logging'       => 'off',
+            'stylesheet'     => 'rateit.css',
+            'location'       => 'head',
+            'stars'          => 5,
+            'increment'      => 0.5,
+            'tooltips'       => '',
+            'response_class' => '',
+            'response_msg'   => '',
+            'logging'        => 'off',
         );
     }
 
