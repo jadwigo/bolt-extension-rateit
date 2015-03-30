@@ -1,6 +1,6 @@
 
 <script type="text/javascript">
-    var asyncpath = "{{ paths.async }}RateIt/";
+    var asyncpath = "{{ paths.async }}RateIt";
     var tooltipvalues = "{{ tooltips }}";
     $('.rateit').bind('over', function(e, value) {
         $(this).attr('title', tooltipvalues[value - 1]);
