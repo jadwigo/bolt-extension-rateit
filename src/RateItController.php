@@ -51,7 +51,7 @@ class RateItController implements ControllerProviderInterface
     public function ajaxRateIt(Silex\Application $app, Request $request, $errors = null)
     {
         // Response array
-        $response = array();
+        $data = array();
 
         // If we were passed an error, exit
         if (is_array($errors)) {
@@ -63,9 +63,10 @@ class RateItController implements ControllerProviderInterface
             // Database records object
             $db = new RateItRecords($app);
 
+            $response    = new JsonResponse(null, Response::HTTP_OK);
             $contenttype = $request->get('contenttype');
             $record_id   = $request->get('record_id');
-            $cookie      = $this->getVoteCookie($contenttype, $record_id);
+            $cookie      = $this->getVoteCookie($contenttype, $record_id, floatval($request->get('value')));
             $votedata    = $this->getVote($request, $db, $cookie);
 
             // Log it, if desired
@@ -75,18 +76,22 @@ class RateItController implements ControllerProviderInterface
 
             // Write it back
             if ($db->dbUpdateRating($votedata)) {
-                $response= array(
+                $data = array(
                     'retval' => 0,
                     'msg'    => str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
                 );
+
+                $this->setVoteCookie($response, $cookie);
             } else {
-                $response= array(
+                $data = array(
                     'retval' => 1,
                     'msg'    => 'Sorry, something went wrong'
                 );
+
+                $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            return new JsonResponse($response, Response::HTTP_OK);
+            return $response->setData($data);
         }
 
         return new JsonResponse('Invalid request type!', JsonResponse::HTTP_FORBIDDEN);
@@ -138,15 +143,16 @@ class RateItController implements ControllerProviderInterface
      *
      * @param string  $contenttype
      * @param integer $record_id
+     * @param integer $value
      *
      * @return string
      */
-    private function getVoteCookie($contenttype, $record_id)
+    private function getVoteCookie($contenttype, $record_id, $value)
     {
         $expire = time() + 31536000;
         $name   = "rateit[$contenttype][$record_id]";
 
-        return new Cookie($name, true, $expire);
+        return new Cookie($name, $value, $expire);
     }
 
     /**
