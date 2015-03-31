@@ -46,7 +46,7 @@ class RateItController implements ControllerProviderInterface
      * @param \Silex\Application                        $app
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
-     * @return Symfony\Component\HttpFoundation\JsonResponse
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function ajaxRateIt(Silex\Application $app, Request $request, $errors = null)
     {
