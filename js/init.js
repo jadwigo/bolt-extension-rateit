@@ -21,7 +21,7 @@ $('.rateit').bind('rated reset', function(e) {
 			$('#rateit_response-' + record_id).show();
 		},
 		error : function(jxhr, msg, err) {
-			$('#rateit_response-' + record_id).html('<span style=\"color:red\">AJAX error: (' + err + ')</span>');
+			$('#rateit_response-' + record_id).html('<span class="error">Rating AJAX error: (' + err + ')</span>');
 			$('#rateit_response-' + record_id).show();
 		},
 		dataType : 'json'
