@@ -83,7 +83,11 @@ class RateItController implements ControllerProviderInterface
                     'msg'    => $votedata['vote'] == 0 ? '' : str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
                 );
 
-                $this->setVoteCookie($response, $cookie);
+                if ($votedata['vote'] == 0) {
+                    $this->clearVoteCookie($response, $cookie);
+                } else {
+                    $this->setVoteCookie($response, $cookie);
+                }
             } catch (\Exception $e) {
                 $data = array(
                     'retval' => 1,
@@ -192,7 +196,7 @@ class RateItController implements ControllerProviderInterface
      *
      * @return Response
      */
-    private function clearVoteCookie(Response $response, Cookie $cookie)
+    private function clearVoteCookie(Response &$response, Cookie $cookie)
     {
         return $response->headers->clearCookie($cookie->getName());
     }
