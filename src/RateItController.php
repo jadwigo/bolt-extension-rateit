@@ -75,17 +75,19 @@ class RateItController implements ControllerProviderInterface
             }
 
             // Write it back
-            if ($db->dbUpdateRating($votedata)) {
+            try {
+                $db->dbUpdateRating($votedata);
+
                 $data = array(
                     'retval' => 0,
-                    'msg'    => str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
+                    'msg'    => $votedata['vote'] == 0 ? '' : str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
                 );
 
                 $this->setVoteCookie($response, $cookie);
-            } else {
+            } catch (\Exception $e) {
                 $data = array(
                     'retval' => 1,
-                    'msg'    => 'Sorry, something went wrong'
+                    'msg'    => 'Sorry, something went wrong: ' .  $e->getMessage()
                 );
 
                 $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -112,22 +114,34 @@ class RateItController implements ControllerProviderInterface
         $db_rating   = $db->dbLookupRating($contenttype, $record_id);
         $vote        = floatval($request->get('value'));
 
+        // $cookie->getValue()
+        $req_cookie = $request->cookies->get('rateit', 0);
+        $last_vote  = isset($req_cookie[$contenttype][$record_id]) ? $req_cookie[$contenttype][$record_id] : 0;
+
         if (empty($db_rating)) {
             $create   = true;
-            $vote_num = 1;
+            $vote_num = $vote === 0 ? 0 : 1;
             $vote_sum = $vote;
             $vote_avg = $vote;
         } else {
             $create   = false;
-            $vote_num = $db_rating['vote_num'] + 1;
-            $vote_sum = $db_rating['vote_sum'] + $vote;
-            $vote_avg = round($vote_sum / $vote_num, 2);
+
+            if ($vote == 0) {
+                // Vote's been reset
+                $vote_num = $last_vote == 0 ? $db_rating['vote_num'] : $db_rating['vote_num'] - 1;
+                $vote_sum = $db_rating['vote_sum'] - $last_vote;
+                $vote_avg = round($vote_sum / $vote_num, 2);
+            } else {
+                $vote_num = $db_rating['vote_num'] + 1;
+                $vote_sum = $db_rating['vote_sum'] + $vote;
+                $vote_avg = round($vote_sum / $vote_num, 2);
+            }
         }
 
         return array(
             'datetime'    => date('Y-m-d H:i:s', time()),
             'ip'          => $request->getClientIp(),
-            'cookie'      => $request->cookies->get($cookie->getName(), $cookie->getValue()),
+            'cookie'      => $cookie->getName(),
             'content_id'  => $record_id,
             'contenttype' => $contenttype,
             'vote'        => $vote,
