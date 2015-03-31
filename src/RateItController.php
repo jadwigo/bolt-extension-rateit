@@ -163,7 +163,7 @@ class RateItController implements ControllerProviderInterface
      */
     private function getVoteCookie($contenttype, $record_id, $value)
     {
-        $expire = time() + 31536000;
+        $expire = strtotime('+1 year');
         $name   = "rateit[$contenttype][$record_id]";
 
         return new Cookie($name, $value, $expire);
