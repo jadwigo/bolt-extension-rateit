@@ -33,7 +33,7 @@ class RateItController implements ControllerProviderInterface
         /** @var $ctr \Silex\ControllerCollection */
         $ctr = $app['controllers_factory'];
 
-        $ctr->match('/', array($this, 'ajaxRateIt'))
+        $ctr->match('', array($this, 'ajaxRateIt'))
             ->bind('ajaxRateIt')
             ->method('POST');
 
@@ -59,48 +59,48 @@ class RateItController implements ControllerProviderInterface
         }
 
         // Check that we're here for a POST instead of a programmer typo
-        if ($request->getMethod() === 'POST') {
-            // Database records object
-            $db = new RateItRecords($app);
-
-            $response    = new JsonResponse(null, Response::HTTP_OK);
-            $contenttype = $request->get('contenttype');
-            $record_id   = $request->get('record_id');
-            $cookie      = $this->getVoteCookie($contenttype, $record_id, floatval($request->get('value')));
-            $votedata    = $this->getVote($request, $db, $cookie);
-
-            // Log it, if desired
-            if ($this->config['logging'] === 'on') {
-                $db->dbLogVote($votedata);
-            }
-
-            // Write it back
-            try {
-                $db->dbUpdateRating($votedata);
-
-                $data = array(
-                    'retval' => 0,
-                    'msg'    => $votedata['vote'] == 0 ? '' : str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
-                );
-
-                if ($votedata['vote'] == 0) {
-                    $this->clearVoteCookie($response, $cookie);
-                } else {
-                    $this->setVoteCookie($response, $cookie);
-                }
-            } catch (\Exception $e) {
-                $data = array(
-                    'retval' => 1,
-                    'msg'    => 'Sorry, something went wrong: ' .  $e->getMessage()
-                );
-
-                $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            return $response->setData($data);
+        if ($request->getMethod() !== 'POST') {
+            return new Response('', Response::HTTP_MOVED_PERMANENTLY);
         }
 
-        return new JsonResponse('Invalid request type!', JsonResponse::HTTP_FORBIDDEN);
+        // Database records object
+        $db = new RateItRecords($app);
+
+        $response    = new JsonResponse(null, Response::HTTP_OK);
+        $contenttype = $request->get('contenttype');
+        $record_id   = $request->get('record_id');
+        $cookie      = $this->getVoteCookie($contenttype, $record_id, floatval($request->get('value')));
+        $votedata    = $this->getVote($request, $db, $cookie);
+
+        // Log it, if desired
+        if ($this->config['logging'] === 'on') {
+            $db->dbLogVote($votedata);
+        }
+
+        // Write it back
+        try {
+            $db->dbUpdateRating($votedata);
+
+            $data = array(
+                'retval' => 0,
+                'msg'    => $votedata['vote'] == 0 ? '' : str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
+            );
+
+            if ($votedata['vote'] == 0) {
+                $this->clearVoteCookie($response, $cookie);
+            } else {
+                $this->setVoteCookie($response, $cookie);
+            }
+        } catch (\Exception $e) {
+            $data = array(
+                'retval' => 1,
+                'msg'    => 'Sorry, something went wrong: ' .  $e->getMessage()
+            );
+
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $response->setData($data);
     }
 
     /**

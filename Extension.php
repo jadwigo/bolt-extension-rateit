@@ -169,9 +169,17 @@ class Extension extends \Bolt\BaseExtension
         // JavaScript
         $this->addJavascript('js/bolt.rateit.min.js', true);
 
+        // Ugly hack for paths until we get it sorted in core
+        if (version_compare($this->app['bolt_version'], '2.2.0', '<')) {
+            $basepath = $this->app['resources']->getUrl('async') . 'RateIt/';
+        } else {
+            $basepath = $this->app['resources']->getUrl('async') . 'RateIt';
+        }
+
         $js = $this->app['render']->render('_javascript.twig', array(
             'config'   => $this->config,
-            'tooltips' => $this->config['tooltips']
+            'tooltips' => $this->config['tooltips'],
+            'basepath' => $basepath
         ));
 
         $this->addSnippet(SnippetLocation::END_OF_HTML, $js);
