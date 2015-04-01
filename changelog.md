@@ -1,5 +1,10 @@
 # Changelog for RateIt
 
+* 2.0.xi32 (2015-04-01)
+
+ * Allow custom messages in the config file
+ * Prevent vote stuffing on unlocked rating
+
 * 2.0.2 (2015-03-31)
 
  * Allow vote to be reset (credit @jadwigo)
