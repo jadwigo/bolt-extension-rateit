@@ -119,15 +119,21 @@ class Extension extends \Bolt\BaseExtension
     protected function getDefaultConfig()
     {
         return array(
-            'stylesheet'      => 'rateit.css',
-            'location'        => 'head',
-            'stars'           => 5,
-            'lock_after_vote' => false,
-            'increment'       => 0.5,
-            'tooltips'        => '',
-            'response_class'  => '',
-            'response_msg'    => '',
-            'logging'         => 'off',
+            'stylesheet'         => 'rateit.css',
+            'location'           => 'head',
+            'stars'              => 5,
+            'lock_after_vote'    => false,
+            'increment'          => 0.5,
+            'tooltips'           => '',
+            'response_class'     => '',
+            'response_msg'       => '',
+            'logging'            => 'off',
+            'response_msg'       => '',
+            'already_msg'        => '',
+            'error_msg'          => 'A server error has occurred: %ERROR%',
+            'response_msg_class' => '',
+            'already_msg_class'  => '',
+            'error_msg_class'    => 'error',
         );
     }
 

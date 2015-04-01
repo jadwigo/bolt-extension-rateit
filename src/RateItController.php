@@ -66,41 +66,39 @@ class RateItController implements ControllerProviderInterface
         // Database records object
         $db = new RateItRecords($app);
 
-        $response    = new JsonResponse(null, Response::HTTP_OK);
+        $response    = new Response(null, Response::HTTP_OK);
         $contenttype = $request->get('contenttype');
         $record_id   = $request->get('record_id');
         $cookie      = $this->getVoteCookie($contenttype, $record_id, floatval($request->get('value')));
         $votedata    = $this->getVote($request, $db, $cookie);
 
-        // Log it, if desired
-        if ($this->config['logging'] === 'on') {
-            $db->dbLogVote($votedata);
-        }
-
-        // Write it back
-        try {
-            $db->dbUpdateRating($votedata);
-
-            $data = array(
-                'retval' => 0,
-                'msg'    => $votedata['vote'] == 0 ? '' : str_replace('%RATING%', $votedata['vote'], $this->config['response_msg'])
-            );
-
-            if ($votedata['vote'] == 0) {
-                $this->clearVoteCookie($response, $cookie);
-            } else {
-                $this->setVoteCookie($response, $cookie);
+        // Prevent vote stuffing
+        if ($votedata['vote'] > 0 && $this->hasVoteCookie($request, $contenttype, $record_id)) {
+            $response->setStatusCode(Response::HTTP_I_AM_A_TEAPOT);
+            $this->makeTea($app, $response, $votedata['vote']);
+        } else {
+            // Log it, if desired
+            if ($this->config['logging'] === 'on') {
+                $db->dbLogVote($votedata);
             }
-        } catch (\Exception $e) {
-            $data = array(
-                'retval' => 1,
-                'msg'    => 'Sorry, something went wrong: ' .  $e->getMessage()
-            );
 
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            // Write it back
+            try {
+                $db->dbUpdateRating($votedata);
+
+                if ($votedata['vote'] == 0) {
+                    $this->clearVoteCookie($response, $cookie);
+                } else {
+                    $this->setVoteCookie($response, $cookie);
+                    $this->makeTea($app, $response, $votedata['vote']);
+                }
+            } catch (\Exception $e) {
+                $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+                $this->makeTea($app, $response, $e->getMessage());
+            }
         }
 
-        return $response->setData($data);
+        return $response;
     }
 
     /**
@@ -118,13 +116,12 @@ class RateItController implements ControllerProviderInterface
         $db_rating   = $db->dbLookupRating($contenttype, $record_id);
         $vote        = floatval($request->get('value'));
 
-        // $cookie->getValue()
         $req_cookie = $request->cookies->get('rateit', 0);
         $last_vote  = isset($req_cookie[$contenttype][$record_id]) ? $req_cookie[$contenttype][$record_id] : 0;
 
         if (empty($db_rating)) {
             $create   = true;
-            $vote_num = $vote === 0 ? 0 : 1;
+            $vote_num = $vote == 0 ? 0 : 1;
             $vote_sum = $vote;
             $vote_avg = $vote;
         } else {
@@ -154,6 +151,23 @@ class RateItController implements ControllerProviderInterface
             'vote_avg'    => $vote_avg,
             'create'      => $create
         );
+    }
+
+    /**
+     * @param Request $request
+     * @param string  $contenttype
+     * @param integer $record_id
+     *
+     * @return string
+     */
+    private function hasVoteCookie(Request $request, $contenttype, $record_id)
+    {
+        $cookie = $request->cookies->get('rateit');
+        if (isset($cookie[$contenttype][$record_id])) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -199,5 +213,36 @@ class RateItController implements ControllerProviderInterface
     private function clearVoteCookie(Response &$response, Cookie $cookie)
     {
         return $response->headers->clearCookie($cookie->getName());
+    }
+
+    /**
+     * @param \Silex\Application                         $app
+     * @param \Symfony\Component\HttpFoundation\Response $response
+     * @param integer|string                             $value
+     */
+    private function makeTea(Silex\Application $app, &$response, $value)
+    {
+        if ($response->getStatusCode() === Response::HTTP_OK) {
+            $context = array(
+                'message' => str_replace('%RATING%', $value, $this->config['response_msg']),
+                'class'   => $this->config['response_msg_class']
+            );
+        } elseif ($response->getStatusCode() === Response::HTTP_I_AM_A_TEAPOT) {
+            $context = array(
+                'message' => str_replace('%RATING%', $value, $this->config['already_msg']),
+                'class'   => $this->config['already_msg_class']
+            );
+        } else {
+            $context = array(
+                'message' => str_replace('%ERROR%', $value, $this->config['error_msg']),
+                'class'   => $this->config['error_msg_class']
+            );
+        }
+
+        $app['twig.loader.filesystem']->addPath(dirname(__DIR__) . '/assets');
+        $html = $app['render']->render('_teapot.twig', $context);
+        $html = new \Twig_Markup($html, 'UTF-8');
+
+        $response->setContent($html);
     }
 }

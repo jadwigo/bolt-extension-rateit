@@ -25,9 +25,17 @@ location: head
 # Class for the AJAX repsonse div (default: '')
 #reponse_class: panel
 
-# Message returned to the person giving the rating. Uses the macro %RATING% 
-# (default: blank)
-#response_msg: 'Your rating of %RATING% has been recorded. Thank you!'  
+# Message returned to the person giving the rating. Uses the macros: 
+#   %RATING%
+#   %ERROR% 
+#response_msg: "Your rating of %RATING% has been recorded. Thank you!"
+#already_msg: "Sorry, but you've already voted. You can reset your vote and try again, though."
+#error_msg: "A server error has occurred: %ERROR%"
+
+# Class attributes for each message
+#response_msg_class: 
+#already_msg_class: 
+#error_msg_class: 
 
 # Log votes: 'on' or 'off' (default: off)
 #logging: on

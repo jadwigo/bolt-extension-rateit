@@ -1,4 +1,4 @@
-$('.rateit').bind('rated reset', function(e) {
+$('.rateit').bind('reset rated', function(e) {
 	var ri = $(this);
 
 	// If the user pressed reset, it will get value: 0
@@ -17,11 +17,19 @@ $('.rateit').bind('rated reset', function(e) {
 		success : function(data) {
 			var retval = data.retval;
 			var msg = data.msg;
-			$('#rateit_response-' + record_id).html('<span>' + msg + '</span>');
+			$('#rateit_response-' + record_id).html(msg);
 			$('#rateit_response-' + record_id).show();
+			
+			// Update the default value
+			$('.rateit').data('bolt-rateit-value', data.value);
 		},
 		error : function(jxhr, msg, err) {
-			$('#rateit_response-' + record_id).html('<span class="error">Rating AJAX error: (' + err + ')</span>');
+			if (jxhr.status == 418) {
+				// Vote stuffing detected, reset to pre-press
+				$('.rateit').rateit('value', $('.rateit').data('bolt-rateit-value'));
+		    }
+
+			$('#rateit_response-' + record_id).html(jxhr.responseText);
 			$('#rateit_response-' + record_id).show();
 		},
 		dataType : 'json'
