@@ -5,7 +5,6 @@ namespace Bolt\Extension\Bolt\RateIt;
 use Bolt\Application;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Schema;
-use Sirius\Validation\Rule\Integer;
 
 /**
  * @author Gawain Lynch <gawain.lynch@gmail.com>
@@ -78,7 +77,7 @@ class RateItRecords
             ->createQueryBuilder()
             ->select('vote_num, vote_sum, vote_avg')
             ->from($this->table_name)
-            ->where('contenttype = :contenttype AND content_id = :content_id')
+            ->where('contenttype = :contenttype', 'content_id = :content_id')
             ->setParameters(array(
                 'content_id'  => $record_id,
                 'contenttype' => $contenttype
