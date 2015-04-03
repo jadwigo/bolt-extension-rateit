@@ -127,7 +127,12 @@ class RateItController implements ControllerProviderInterface
         } else {
             $create   = false;
 
-            if ($vote == 0) {
+            if($vote_num == 0 && $vote == 0) {
+                // first vote has been reset
+                $vote_num = 0;
+                $vote_sum = 0;
+                $vote_avg = 0;
+            } elseif ($vote == 0) {
                 // Vote's been reset
                 $vote_num = $last_vote == 0 ? $db_rating['vote_num'] : $db_rating['vote_num'] - 1;
                 $vote_sum = $db_rating['vote_sum'] - $last_vote;
