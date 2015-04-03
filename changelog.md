@@ -1,6 +1,11 @@
 # Changelog for RateIt
 
-* 2.0.xi32 (2015-04-01)
+* 2.0.4
+
+ * Ensure number format keeps a dot for decimals (credit @bobdenotter & jadwigo)
+ * Catch divide by zero if first vote is reset (credit @jadwigo)
+
+* 2.0.3 (2015-04-01)
 
  * Allow custom messages in the config file
  * Prevent vote stuffing on unlocked rating
