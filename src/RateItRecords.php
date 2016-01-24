@@ -3,7 +3,6 @@
 namespace Bolt\Extension\Bolt\RateIt;
 
 use Bolt\Application;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
@@ -48,7 +47,7 @@ class RateItRecords
                 'cookie'      => ':cookie',
                 'content_id'  => ':content_id',
                 'contenttype' => ':contenttype',
-                'vote'        => ':vote'
+                'vote'        => ':vote',
             ))
             ->setParameters(array(
                 'datetime'    => date('Y-m-d H:i:s', time()),
@@ -56,7 +55,7 @@ class RateItRecords
                 'cookie'      => $vote['cookie'],
                 'content_id'  => $vote['content_id'],
                 'contenttype' => $vote['contenttype'],
-                'vote'        => $vote['vote']
+                'vote'        => $vote['vote'],
             ))
             ->execute();
     }
@@ -80,7 +79,7 @@ class RateItRecords
             ->where('contenttype = :contenttype', 'content_id = :content_id')
             ->setParameters(array(
                 'content_id'  => $record_id,
-                'contenttype' => $contenttype
+                'contenttype' => $contenttype,
             ))
         ;
 
@@ -107,7 +106,7 @@ class RateItRecords
                     'contenttype' => ':contenttype',
                     'vote_num'    => ':vote_num',
                     'vote_sum'    => ':vote_sum',
-                    'vote_avg'    => ':vote_avg'
+                    'vote_avg'    => ':vote_avg',
             ));
         } else {
             $query->update($this->table_name)
@@ -124,7 +123,7 @@ class RateItRecords
                 'contenttype' => $rating['contenttype'],
                 'vote_num'    => $rating['vote_num'],
                 'vote_sum'    => $rating['vote_sum'],
-                'vote_avg'    => $rating['vote_avg']
+                'vote_avg'    => $rating['vote_avg'],
             ))
             ->execute();
 

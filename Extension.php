@@ -23,7 +23,7 @@ class Extension extends \Bolt\BaseExtension
 
     public function getName()
     {
-        return Extension::NAME;
+        return self::NAME;
     }
 
     public function initialize()
@@ -107,7 +107,7 @@ class Extension extends \Bolt\BaseExtension
             'record'           => $record,
             'bolt_record_id'   => $bolt_record_id,
             'bolt_contenttype' => $bolt_contenttype,
-            'current_val'      => $current_val
+            'current_val'      => $current_val,
         ));
 
         return new \Twig_Markup($html, 'UTF-8');
@@ -185,7 +185,7 @@ class Extension extends \Bolt\BaseExtension
         $js = $this->app['render']->render('_javascript.twig', array(
             'config'   => $this->config,
             'tooltips' => $this->config['tooltips'],
-            'basepath' => $basepath
+            'basepath' => $basepath,
         ));
 
         $this->addSnippet(SnippetLocation::END_OF_HTML, $js);

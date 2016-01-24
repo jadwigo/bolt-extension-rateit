@@ -5,7 +5,6 @@ namespace Bolt\Extension\Bolt\RateIt;
 use Silex;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -104,8 +103,9 @@ class RateItController implements ControllerProviderInterface
     /**
      * Get the vote data
      *
-     * @param Request $request
-     * @param Cookie  $cookie
+     * @param Request       $request
+     * @param RateItRecords $db
+     * @param Cookie        $cookie
      *
      * @return array
      */
@@ -154,7 +154,7 @@ class RateItController implements ControllerProviderInterface
             'vote_num'    => $vote_num,
             'vote_sum'    => $vote_sum,
             'vote_avg'    => $vote_avg,
-            'create'      => $create
+            'create'      => $create,
         );
     }
 
@@ -215,7 +215,7 @@ class RateItController implements ControllerProviderInterface
      *
      * @return Response
      */
-    private function clearVoteCookie(Response &$response, Cookie $cookie)
+    private function clearVoteCookie(Response $response, Cookie $cookie)
     {
         return $response->headers->clearCookie($cookie->getName());
     }
@@ -230,17 +230,17 @@ class RateItController implements ControllerProviderInterface
         if ($response->getStatusCode() === Response::HTTP_OK) {
             $context = array(
                 'message' => str_replace('%RATING%', $value, $this->config['response_msg']),
-                'class'   => $this->config['response_msg_class']
+                'class'   => $this->config['response_msg_class'],
             );
         } elseif ($response->getStatusCode() === Response::HTTP_I_AM_A_TEAPOT) {
             $context = array(
                 'message' => str_replace('%RATING%', $value, $this->config['already_msg']),
-                'class'   => $this->config['already_msg_class']
+                'class'   => $this->config['already_msg_class'],
             );
         } else {
             $context = array(
                 'message' => str_replace('%ERROR%', $value, $this->config['error_msg']),
-                'class'   => $this->config['error_msg_class']
+                'class'   => $this->config['error_msg_class'],
             );
         }
 
