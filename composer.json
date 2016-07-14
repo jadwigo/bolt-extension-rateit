@@ -24,5 +24,11 @@
 				"src/"
 			]
 		}
-	}
+	},
+    "extra": {
+        "bolt-icon": "icon.png",
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        }
+    }
 }
